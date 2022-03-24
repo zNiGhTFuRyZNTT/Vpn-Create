@@ -1,0 +1,27 @@
+{
+  "name": "vpn-create",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zNiGhTFuRyZNTT/Vpn-Create.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zNiGhTFuRyZNTT/Vpn-Create/issues"
+  },
+  "homepage": "https://github.com/zNiGhTFuRyZNTT/Vpn-Create#readme",
+  "dependencies": {
+    "adm-zip": "^0.5.9",
+    "dotenv": "^16.0.0",
+    "node-dotenv": "^1.1.1",
+    "telebot": "^1.4.1"
+  }
+}
