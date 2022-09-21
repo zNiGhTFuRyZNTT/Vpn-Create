@@ -1,60 +1,76 @@
 const { exec } = require("child_process")
-var AdmZip = require("adm-zip");
 
 function create_zip(path, zipname) {
-    const zip = new AdmZip()
-    zip.addLocalFile(path)
-    zip.writeZip(`storage/${zipname}.zip`)
+    return new Promise(function (resolve, reject) {
+        exec(`sudo zip storage/${zipname}.zip ${path}`, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`)
+                reject(error)
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`)
+                reject(stderr)
+            }
+            console.log(`${stdout}`)
+            resolve(stdout)
+        })
+    })
 }
 
 function create_vpn(keys, key, name) {
-    if (!keys.includes(key)) return
+    return new Promise((resolve, reject) => {
+        if (!keys.includes(key)) return
 
-    exec(`sudo python3 headquarters.py --action create --name ${name}`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`)
-            return
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`)
-            return
-        }
-        console.log(`stdout: ${stdout}`)
-        return stdout
+        exec(`sudo python3 headquarters.py --action create --name ${name}`, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`)
+                reject(error)
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`)
+                reject(stderr)
+            }
+            console.log(`stdout: ${stdout}`)
+            resolve(stdout)
+        })
     })
 }
 
 function revoke_user(is_admin, num) {
-    if (!is_admin) return
-    exec(`sudo python3 headquarters.py --action revoke --num ${num}`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`)
-            return
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`)
-            return
-        }
-        console.log(`stdout: ${stdout}`)
-        return stdout
+    return new Promise((resolve, reject) => {
+        if (!is_admin) return
+        exec(`sudo python3 headquarters.py --action revoke --num ${num}`, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`)
+                reject(error)
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`)
+                reject(stderr)
+            }
+            console.log(`stdout: ${stdout}`)
+            resolve(stdout)
+        })   
     })
-
 }
 
 function list_users(is_admin) {
-    if (!is_admin) return
-    exec(`sudo python3 headquarters.py --action list`, (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`)
-            return
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`)
-            return
-        }
-        console.log(`stdout: ${stdout}`)
-        return stdout
+    return new Promise((resolve, reject) => {
+        if (!is_admin) return
+        exec(`sudo python3 headquarters.py --action list`, (error, stdout, stderr) => {
+            if (error) {
+                console.log(`error: ${error.message}`)
+                reject(error)
+            }
+            if (stderr) {
+                console.log(`stderr: ${stderr}`)
+                reject(stderr)
+            }
+            // console.log(stdout)
+            resolve(stdout)
+        })
     })
+
 }
 
 
@@ -65,6 +81,9 @@ function throw_key_err(msg) {
 function random_str() {
     return Math.random().toString(36).substr(2, 3)
 }
+function random_int() {
+    return Math.floor(Math.random() * 1000)
+}
 
 
 module.exports = {
@@ -74,4 +93,5 @@ module.exports = {
     revoke_user:   revoke_user,
     list_users:    list_users,
     create_zip: create_zip,
+    random_int: random_int,
 }
