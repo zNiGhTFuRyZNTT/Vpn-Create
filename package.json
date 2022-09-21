@@ -20,6 +20,7 @@
   "homepage": "https://github.com/zNiGhTFuRyZNTT/Vpn-Create#readme",
   "dependencies": {
     "adm-zip": "^0.5.9",
+    "cluster": "^0.7.7",
     "dotenv": "^16.0.0",
     "node-dotenv": "^1.1.1",
     "telebot": "^1.4.1"
