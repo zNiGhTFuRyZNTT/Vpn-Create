@@ -17,10 +17,8 @@ function create_zip(path, zipname) {
     })
 }
 
-function create_vpn(keys, key, name) {
+function create_vpn(name) {
     return new Promise((resolve, reject) => {
-        if (!keys.includes(key)) return
-
         exec(`sudo python3 headquarters.py --action create --name ${name}`, (error, stdout, stderr) => {
             if (error) {
                 console.log(`error: ${error.message}`)

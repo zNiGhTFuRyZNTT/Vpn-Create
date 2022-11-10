@@ -3,6 +3,7 @@ const cluster = require('cluster')
 const { exec } = require("child_process")
 var AdmZip = require("adm-zip")
 const { create_vpn, random_str, throw_key_err, revoke_user, list_users, create_zip, random_int } = require("./functions")
+const database = require("./database")
 require('dotenv').config()
 const token = process.env.API_KEY
 const bot = new TeleBot({
@@ -10,65 +11,41 @@ const bot = new TeleBot({
     usePlugins: ['floodProtection',]
 })
 const admins = process.env.ADMINS.split(",").map(Number)
-const UNIQUE_KEY = process.env.UNIQUE_KEY
-const keys = [UNIQUE_KEY, ]
 
-bot.on(/^\/createkey (.+)$/, async (msg, props) => {
+
+
+bot.on(['/start', '/hello'], (msg) => msg.reply.text('برام /vpn رو بفرست. پاینده ایران🖤👑').catch(console.log))
+
+bot.on('vpn', async (msg) => {
     const is_admin = (admins.indexOf(msg.from.id) >= 0)
-    if (!is_admin) return
+    userId = msg.from.id
+    const userCount = await database.getUser(msg.from.id)
+    await database.addUser(userId, 0)
 
-    const name = props.match[1].replace(/\s/g, '')
-    const key = (random_str() + "0" + name + "1" + random_str()).toUpperCase()
-    console.log(`[>] Key created -> ${key}`);
-    keys.push(key)
-    msg.reply.text(`[>] Key created!\n\tKeyword=${name}`).then(() => {
-        msg.reply.text(`${key}`).catch(msg.reply.text("Error happened please contact admin as soon as possible @NiGhTFuRyZz").catch(console.log))
+    if (userCount < 2 || is_admin) {
 
-    }).catch(() => {
-        msg.reply.text("Error happened please contact admin as soon as possible @NiGhTFuRyZz").catch(console.log)
-    })
-
-})
-
-
-bot.on('/keys', async (msg) => {
-    bot.sendMessage(msg.chat.id, `${keys}`).catch(console.log)
-    return
-})
-
-bot.on(['/start', '/hello'], (msg) => msg.reply.text('Dorood Babe').catch(console.log))
-
-bot.on(/^\/vpn (.+)$/, async (msg, props) => {
-    let req = {}
-    // console.log(props)
-    props.match[1].split(" ").forEach(prop => {
-        const key = prop.split("=")[0]
-        const val = prop.split("=")[1]
-        req[key] = val
-    })
-    if (!(req.key && req.name)) {
-        throw_key_err(msg)
-        return
-    }
-    const is_unique = req.key == UNIQUE_KEY 
-    console.log(req)
-    if (keys.includes(req.key) || is_unique) {
-
-        console.log(keys.includes(req.key) || [UNIQUE_KEY].includes(req.key));
-        const prepMsg = await msg.reply.text("[🍑] Creating vpn please wait ...")
+        // console.log(keys.includes(req.key) || [UNIQUE_KEY].includes(req.key));
+        const prepMsg = await msg.reply.text("[🖤] Creating vpn please wait ...")
         const msgId = prepMsg.message_id
         const filename = `${random_str()}-${req.name.toUpperCase()}-${random_int()}`
         const path = `storage/${filename}.ovpn`
-        console.log(filename);
-        !is_unique ? keys.splice(req.key, 1) : {}
-        await create_vpn(keys, req.key, `${filename}`)
-        await bot.editMessageText({chatId: msg.chat.id, messageId: msgId}, '[🔞] Vpn created, sending ...').catch(err => console.log(err))
-        await create_zip(path, filename).catch(err => console.log(err))
-        await bot.sendDocument(msg.chat.id, `./storage/${filename}.zip`).catch(err => console.log(err))
-        await bot.deleteMessage(msg.chat.id, msgId).catch(err => msg.reply.text(err))
-        return
+        console.log(filename)
+        try {
+            await create_vpn(`${filename}`)
+            await bot.editMessageText({chatId: msg.chat.id, messageId: msgId}, '[🔞] Vpn created, sending ...').catch(err => console.log(err))
+            await create_zip(path, filename).catch(err => console.log(err))
+            await bot.sendDocument(msg.chat.id, `./storage/${filename}.zip`).catch(err => console.log(err))
+            await database.addCount(userId)
+            await bot.deleteMessage(msg.chat.id, msgId).catch(err => msg.reply.text(err))
+            return
+
+        } catch (error) {
+            msg.reply.text(`مشکلی پیش اومد لطفا دوباره تلاش کن یا به من پیام بده @NiGhTFuRyZz`).catch(console.log)
+            return
+        }
+
     }
-    msg.reply.text("[❗] Key not valid, please contact @NiGhTFuRyZz")
+    msg.reply.text("[❗] درخواست نا معتبر, لطفا به ادمین پیام بدید. @NiGhTFuRyZz").catch(console.log)
 })
 
 bot.on(/^\/revoke (.+)$/, async (msg, props) => {

@@ -2,7 +2,6 @@ import subprocess
 import argparse
 import os
 
-
 class Vpn:
     def __init__(self):
         pass
